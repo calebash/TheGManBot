@@ -37,6 +37,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
+  if (interaction.commandName === "purge") {
+    const amount = parseInt(interaction.options.getInteger("amount"));
+    interaction.channel
+      .bulkDelete(amount)
+      .then((messages) =>
+        console.log(`Bulk deleted ${messages.size} messages.`)
+      );
+  }
+
   try {
     await command.execute(interaction);
   } catch (err) {
