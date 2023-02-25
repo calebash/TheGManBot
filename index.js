@@ -40,7 +40,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.commandName === "purge") {
-    const amount = parseInt(interaction.options.getInteger("amount"));
+    let amount = parseInt(interaction.options.getInteger("amount"));
+    if (amount > 100) amount = 100;
+
     interaction.channel
       .bulkDelete(amount)
       .then((messages) =>
