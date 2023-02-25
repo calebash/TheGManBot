@@ -2,14 +2,13 @@ const { SlashCommandBuilder } = require("discord.js");
 const {
   getVoiceConnection,
   joinVoiceChannel,
-  createAudioPlayer,
   createAudioResource,
   StreamType,
 } = require("@discordjs/voice");
 
 const ytdl = require("ytdl-core-discord");
 
-const player = createAudioPlayer();
+const { player } = require("../audioPlayer");
 
 module.exports = {
   data: new SlashCommandBuilder()
