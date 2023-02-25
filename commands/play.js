@@ -28,8 +28,8 @@ module.exports = {
 
       if (connection == undefined) {
         connection = joinVoiceChannel({
-          channelId: "1079060882216194119",
-          guildId: interaction.guild.id,
+          channelId: interaction.member.voice.channel.id,
+          guildId: interaction.member.guild.id,
           adapterCreator: interaction.guild.voiceAdapterCreator,
         });
       }
@@ -46,7 +46,9 @@ module.exports = {
 
       player.play(resource);
 
-      await interaction.reply("Pong!");
+      const info = await ytdl.getBasicInfo(link);
+
+      await interaction.reply(`Cool! Now playing ${info.videoDetails.title}`);
     } catch (e) {
       let connection = getVoiceConnection(interaction.guild.id);
 
