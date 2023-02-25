@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const { SlashCommandBuilder } = require("discord.js");
 const {
   getVoiceConnection,
@@ -7,13 +9,21 @@ const {
 } = require("@discordjs/voice");
 
 const ytdl = require("ytdl-core-discord");
+const search = require("youtube-search");
+
+const searchOptions = {
+  maxResults: 1,
+  key: process.env.YT_API_KEY,
+};
 
 const { player } = require("../audioPlayer");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("play")
-    .setDescription("Play music by entering in a YouTube link!")
+    .setDescription(
+      "Play music by entering in a YouTube link or searching for the title!"
+    )
     .addStringOption((option) =>
       option
         .setName("link")
@@ -36,7 +46,20 @@ module.exports = {
 
       connection.subscribe(player);
 
-      const stream = await ytdl(link, {
+      let searchLink = link;
+
+      if (!link.includes("http")) {
+        const { results } = await search(link, searchOptions);
+        if (
+          results.length === 0 ||
+          results === undefined ||
+          results[0] === undefined
+        )
+          return;
+        searchLink = results[0].link;
+      }
+
+      const stream = await ytdl(searchLink, {
         highWaterMark: 1 << 25,
         filter: "audioonly",
       });
@@ -46,7 +69,7 @@ module.exports = {
 
       player.play(resource);
 
-      const info = await ytdl.getBasicInfo(link);
+      const info = await ytdl.getBasicInfo(searchLink);
 
       await interaction.reply(`Cool! Now playing ${info.videoDetails.title}`);
     } catch (e) {
