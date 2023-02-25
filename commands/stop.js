@@ -11,6 +11,11 @@ module.exports = {
   async execute(interaction) {
     try {
       let connection = getVoiceConnection(interaction.guild.id);
+      if (connection == undefined)
+        return await interaction.reply(
+          "There's no music to be stopped, sorry about that!"
+        );
+
       player.stop();
       connection.destroy();
       await interaction.reply("Stopped playing music. Take that John!");
