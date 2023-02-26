@@ -16,6 +16,28 @@ const searchOptions = {
   key: process.env.YT_API_KEY,
 };
 
+const getYoutubeLink = async (link) => {
+  if (link.includes("http")) return link;
+
+  const { results } = await search(link, searchOptions);
+  if (results.length === 0 || results === undefined || results[0] === undefined)
+    return;
+
+  return results[0].link;
+};
+
+const getConnection = (interaction) => {
+  const connection = getVoiceConnection(interaction.guild.id);
+
+  if (connection !== undefined) return connection;
+
+  return joinVoiceChannel({
+    channelId: interaction.member.voice.channel.id,
+    guildId: interaction.member.guild.id,
+    adapterCreator: interaction.guild.voiceAdapterCreator,
+  });
+};
+
 const { player } = require("../audioPlayer");
 
 module.exports = {
@@ -33,43 +55,23 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const link = interaction.options.getString("link");
-      let connection = getVoiceConnection(interaction.guild.id);
-
-      if (connection == undefined) {
-        connection = joinVoiceChannel({
-          channelId: interaction.member.voice.channel.id,
-          guildId: interaction.member.guild.id,
-          adapterCreator: interaction.guild.voiceAdapterCreator,
-        });
-      }
+      const linkArg = interaction.options.getString("link");
+      const connection = getConnection();
+      const link = await getYoutubeLink(linkArg);
+      const info = await ytdl.getBasicInfo(link);
 
       connection.subscribe(player);
 
-      let searchLink = link;
-
-      if (!link.includes("http")) {
-        const { results } = await search(link, searchOptions);
-        if (
-          results.length === 0 ||
-          results === undefined ||
-          results[0] === undefined
-        )
-          return;
-        searchLink = results[0].link;
-      }
-
-      const stream = await ytdl(searchLink, {
+      const stream = await ytdl(link, {
         highWaterMark: 1 << 25,
         filter: "audioonly",
       });
+
       const resource = createAudioResource(stream, {
         inputType: StreamType.Opus,
       });
 
       player.play(resource);
-
-      const info = await ytdl.getBasicInfo(searchLink);
 
       await interaction.reply(`Cool! Now playing ${info.videoDetails.title}`);
     } catch (e) {
