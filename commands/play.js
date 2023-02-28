@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+const botMessages = require("../botMessages.json");
+
 const { SlashCommandBuilder } = require("discord.js");
 const {
   getVoiceConnection,
@@ -56,7 +58,7 @@ module.exports = {
   async execute(interaction) {
     try {
       const linkArg = interaction.options.getString("link");
-      const connection = getConnection();
+      const connection = getConnection(interaction);
       const link = await getYoutubeLink(linkArg);
       const info = await ytdl.getBasicInfo(link);
 
@@ -65,6 +67,7 @@ module.exports = {
       const stream = await ytdl(link, {
         highWaterMark: 1 << 25,
         filter: "audioonly",
+        quality: "lowest",
       });
 
       const resource = createAudioResource(stream, {
@@ -73,7 +76,10 @@ module.exports = {
 
       player.play(resource);
 
-      await interaction.reply(`Cool! Now playing ${info.videoDetails.title}`);
+      const botMessageIndex = Math.floor(Math.random() * botMessages.length);
+      await interaction.reply(
+        `${botMessages[botMessageIndex]} Now playing ${info.videoDetails.title}`
+      );
     } catch (e) {
       let connection = getVoiceConnection(interaction.guild.id);
 
