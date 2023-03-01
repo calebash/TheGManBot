@@ -84,7 +84,7 @@ module.exports = {
       let connection = getVoiceConnection(interaction.guild.id);
 
       if (connection !== undefined) connection.destroy();
-      console.log(e.toString());
+      console.log("An error has occurred: " + e.toString());
       await interaction.reply(
         "Jinkies! Something went wrong with that link, Scoobes!"
       );
