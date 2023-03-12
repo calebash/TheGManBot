@@ -39,15 +39,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
-  if (interaction.commandName === "purge") {
-    let amount = parseInt(interaction.options.getInteger("amount"));
-    if (amount > 100) amount = 100;
+  try {
+    if (interaction.commandName === "purge") {
+      let amount = parseInt(interaction.options.getInteger("amount"));
+      if (amount > 100) amount = 100;
 
-    interaction.channel
-      .bulkDelete(amount)
-      .then((messages) =>
-        console.log(`Bulk deleted ${messages.size} messages.`)
-      );
+      const messages = await interaction.channel.bulkDelete(amount);
+      console.log(`Bulk deleted ${messages.size} messages.`);
+    }
+  } catch (e) {
+    console.log(e);
   }
 
   try {
