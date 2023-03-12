@@ -3,6 +3,11 @@ const { REST, Routes } = require("discord.js");
 const { CLIENT_TOKEN, CLIENT_ID, GUILD_ID } = process.env;
 const fs = require("node:fs");
 
+function requireUncached(mod) {
+  delete require.cache[require.resolve(mod)];
+  return require(mod);
+}
+
 const commands = [];
 // Grab all the command files from the commands directory you created earlier
 const commandFiles = fs
@@ -11,7 +16,7 @@ const commandFiles = fs
 
 // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
+  const command = requireUncached(`./commands/${file}`);
   commands.push(command.data.toJSON());
 }
 
