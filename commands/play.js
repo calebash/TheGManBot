@@ -67,7 +67,6 @@ module.exports = {
       const stream = await ytdl(link, {
         highWaterMark: 1 << 25,
         filter: "audioonly",
-        quality: "lowest",
       });
 
       const resource = createAudioResource(stream, {
